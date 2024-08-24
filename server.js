@@ -3,7 +3,12 @@ const cors = require('cors');
 const db = require('./db');
 const app = express();
 
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: 'https://bbsessionfront.netlify.app',
+};
+
+app.use(cors(corsOptions)); // Apply CORS configuration
 app.use(express.json());
 
 // Route to create a new student
@@ -67,7 +72,6 @@ app.get('/api/mentors', (req, res) => {
         res.status(200).json(rows);
     });
 });
-
 
 // Route to create a new session
 app.post('/api/sessions', (req, res) => {
