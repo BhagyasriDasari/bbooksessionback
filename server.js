@@ -33,13 +33,16 @@ app.get('/api/students', (req, res) => {
 
 // Route to create a new mentor
 app.post('/api/mentors', (req, res) => {
-    const { name, area_of_expertise, is_premium, company_name } = req.body;
+    console.log("Attempting to add mentor:", req.body);
+    const { name, area_of_expertise, is_premium = 0, company_name } = req.body;
     const query = `INSERT INTO mentors (name, area_of_expertise, is_premium, company_name) VALUES (?, ?, ?, ?)`;
 
     db.run(query, [name, area_of_expertise, is_premium, company_name], function(err) {
         if (err) {
+            console.error("Error inserting mentor:", err.message);
             return res.status(500).json({ error: err.message });
         }
+        console.log("Mentor added successfully with ID:", this.lastID);
         res.status(201).json({ id: this.lastID });
     });
 });
@@ -47,15 +50,24 @@ app.post('/api/mentors', (req, res) => {
 // Route to get all mentors by area of expertise
 app.get('/api/mentors', (req, res) => {
     const { area_of_expertise } = req.query;
-    const query = `SELECT * FROM mentors WHERE area_of_expertise = ?`;
 
-    db.all(query, [area_of_expertise], (err, rows) => {
+    let query = 'SELECT * FROM mentors';
+    const params = [];
+
+    if (area_of_expertise) {
+        query += ' WHERE area_of_expertise = ?';
+        params.push(area_of_expertise);
+    }
+
+    db.all(query, params, (err, rows) => {
         if (err) {
+            console.error('Error fetching mentors:', err.message);
             return res.status(500).json({ error: err.message });
         }
         res.status(200).json(rows);
     });
 });
+
 
 // Route to create a new session
 app.post('/api/sessions', (req, res) => {
